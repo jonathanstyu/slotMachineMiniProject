@@ -17,6 +17,12 @@ class ViewController: UIViewController {
     
     var titleLabel: UILabel!
     
+//    Buttons in fourth container
+    var resetButton: UIButton!
+    var betOneButton: UIButton!
+    var betMaxButton: UIButton!
+    var spinButton: UIButton!
+    
 //    Information labels
     var creditsLabel: UILabel!
     var betLabel: UILabel!
@@ -33,6 +39,9 @@ class ViewController: UIViewController {
     let kNumberOfSlots = 3
     let kThird:CGFloat = 1.0/3.0
     let kMarginForSlot:CGFloat = 2.0
+    
+    let kHalf: CGFloat = 1.0/2.0
+    let kEighth: CGFloat = 1.0/8.0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,6 +50,7 @@ class ViewController: UIViewController {
         self.setupFirstContainer(self.firstContainer)
         self.setupSecondContainer(self.secondContainer)
         self.setupThirdContainer(self.thirdContainer)
+        self.setupFourthContainer(self.fourthContainer)
     }
 
     override func didReceiveMemoryWarning() {
@@ -162,8 +172,39 @@ class ViewController: UIViewController {
         self.winnerPaidLabel.center = CGPoint(x: containerView.frame.width * kSixth * 5, y: containerView.frame.height * kThird * 2)
         
         containerView.addSubview(self.winnerPaidLabel)
+    }
+    
+    func setupFourthContainer(containerView: UIView) {
+        self.resetButton = UIButton()
+        self.resetButton.setTitle("Reset", forState: UIControlState.Normal)
+        self.resetButton.setTitleColor(UIColor.blueColor(), forState: UIControlState.Normal)
+        self.resetButton.titleLabel?.font = UIFont(name: "Superclarendon-Bold", size: 12)
+//         Why the question mark? Because you are accessing an attribute of the resetButton that may or may not exist. If you do not set a title then the titleLabel will not exist 
+        self.resetButton.backgroundColor = UIColor.lightGrayColor()
+        self.resetButton.sizeToFit()
+        self.resetButton.center = CGPoint(x: containerView.frame.width * kEighth, y: containerView.frame.height * kHalf)
+        self.resetButton.addTarget(self, action: "resetButtonPressed:", forControlEvents: UIControlEvents.TouchUpInside)
+//         Without the colon it is easy to crash the program, specifies that there is a parameter being passed. With multiple parameters, still just 1 colon
         
-
+        containerView.addSubview(self.resetButton)
+        
+        self.betOneButton = UIButton()
+        self.betOneButton.setTitle("Bet One", forState: UIControlState.Normal)
+        self.betOneButton.setTitleColor(UIColor.blueColor(), forState: UIControlState.Normal)
+        self.betOneButton.titleLabel?.font = UIFont(name: "Superclarendon-Bold", size: 12)
+        self.betOneButton.backgroundColor = UIColor.greenColor()
+        self.betOneButton.sizeToFit()
+        self.betOneButton.center = CGPoint(x: containerView.frame.width * 3 * kEighth, y: containerView.frame.height * kHalf)
+        self.betOneButton.addTarget(self, action: "betOneButtonPressed:", forControlEvents: UIControlEvents.TouchUpInside)
+        containerView.addSubview(self.betOneButton)
+    }
+    
+    func resetButtonPressed(button: UIButton) {
+        println("resetButtonPressed")
+    }
+    
+    func betOneButtonPressed(button: UIButton) {
+        println(button)
     }
 
 }
