@@ -25,6 +25,10 @@ class ViewController: UIViewController {
     
     var slots: [[Slot]] = []
     
+    var credits = 0
+    var currentBet = 0
+    var winnings = 0
+    
 //    Information labels
     var creditsLabel: UILabel!
     var betLabel: UILabel!
@@ -50,9 +54,10 @@ class ViewController: UIViewController {
         
         self.setUpContainerViews()
         self.setupFirstContainer(self.firstContainer)
-        self.setupSecondContainer(self.secondContainer)
         self.setupThirdContainer(self.thirdContainer)
         self.setupFourthContainer(self.fourthContainer)
+        
+        self.hardReset()
     }
 
     override func didReceiveMemoryWarning() {
@@ -169,7 +174,7 @@ class ViewController: UIViewController {
         containerView.addSubview(self.creditsTitleLabel)
         
         self.betTitleLabel = UILabel()
-        self.betTitleLabel.text = "Credits"
+        self.betTitleLabel.text = "Bet"
         self.betTitleLabel.textColor = UIColor.blackColor()
         self.betTitleLabel.font = UIFont(name: "AmericanTypewriter", size: 14)
         self.betTitleLabel.sizeToFit()
@@ -177,14 +182,14 @@ class ViewController: UIViewController {
         
         containerView.addSubview(self.betTitleLabel)
         
-        self.winnerPaidLabel = UILabel()
-        self.winnerPaidLabel.text = "Winner Paid"
-        self.winnerPaidLabel.textColor = UIColor.blackColor()
-        self.winnerPaidLabel.font = UIFont(name: "AmericanTypewriter", size: 14)
-        self.winnerPaidLabel.sizeToFit()
-        self.winnerPaidLabel.center = CGPoint(x: containerView.frame.width * kSixth * 5, y: containerView.frame.height * kThird * 2)
+        self.winnerPaidTitleLabel = UILabel()
+        self.winnerPaidTitleLabel.text = "Winner Paid"
+        self.winnerPaidTitleLabel.textColor = UIColor.blackColor()
+        self.winnerPaidTitleLabel.font = UIFont(name: "AmericanTypewriter", size: 14)
+        self.winnerPaidTitleLabel.sizeToFit()
+        self.winnerPaidTitleLabel.center = CGPoint(x: containerView.frame.width * kSixth * 5, y: containerView.frame.height * kThird * 2)
         
-        containerView.addSubview(self.winnerPaidLabel)
+        containerView.addSubview(self.winnerPaidTitleLabel)
     }
     
     func setupFourthContainer(containerView: UIView) {
@@ -233,23 +238,85 @@ class ViewController: UIViewController {
 
     }
     
+    func removeSlotImageViews() {
+        if self.secondContainer != nil {
+            let container: UIView? = self.secondContainer
+            let subViews: Array? = container!.subviews
+            for view in subViews! {
+                view.removeFromSuperview()
+            }
+        }
+    }
+    
+    func hardReset() {
+        removeSlotImageViews()
+        slots.removeAll(keepCapacity: true)
+//         Keeping the memory makes sense here bc there is going to be the same thing again later
+        self.setupSecondContainer(self.secondContainer)
+        credits = 50
+        winnings = 0
+        currentBet = 0
+        
+        updateMainView()
+    }
+    
+    func updateMainView() {
+        self.creditsLabel.text = "\(credits)"
+        self.betLabel.text = "\(currentBet)"
+        self.winnerPaidLabel.text = "\(winnings)"
+    }
+    
+    func showAlertWithText(header: String = "Warning", message: String) {
+        var alert = UIAlertController(title: header, message: message, preferredStyle: UIAlertControllerStyle.Alert)
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: nil))
+        self.presentViewController(alert, animated: true, completion: nil)
+    }
+    
 //     IBActions
     
     func resetButtonPressed(button: UIButton) {
-        println("resetButtonPressed")
+        hardReset()
     }
     
     func betOneButtonPressed(button: UIButton) {
-        println(button)
+        if credits <= 0 {
+            showAlertWithText(header: "No More Credits", message: "Reset Game")
+        } else {
+            if currentBet < 5 {
+                currentBet += 1
+                credits -= 1
+                updateMainView()
+            } else {
+                showAlertWithText(message: "You can only bet 5 credits at a time")
+            }
+        }
     }
     
     func betMaxButtonPressed(button: UIButton) {
-        
+        if credits <= 5 {
+            showAlertWithText(header: "Not Enough Credits", message: "Bet Less")
+        } else {
+            if currentBet < 5 {
+                var creditsToBetMax = 5 - currentBet
+                credits -= creditsToBetMax
+                currentBet += creditsToBetMax
+                updateMainView()
+            } else {
+                showAlertWithText(message: "You can only bet 5 credits at a time!")
+            }
+        }
     }
     
     func spinButtonPressed(button: UIButton) {
+        removeSlotImageViews()
         slots = Factory.createSlots()
         setupSecondContainer(self.secondContainer)
+        
+        var winningMultiplier = SlotBrain.computeWinnings(slots)
+        winnings = winningMultiplier * currentBet
+        credits += winnings
+        currentBet = 0
+        updateMainView()
     }
 
 }
